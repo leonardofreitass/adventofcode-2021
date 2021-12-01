@@ -1,6 +1,6 @@
-(ns adventofcode-2021.exercises.day-1.part-1)
+(ns adventofcode-2021.exercises.day-1.part-2)
 
-(def window 1)
+(def window 3)
 
 (defn run
   [inputs]
