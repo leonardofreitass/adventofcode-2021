@@ -3,8 +3,8 @@
 (require '[clojure.string :as str])
 
 (defn transpose
-  [inputs]
-  (apply map list (map #(str/split % #"") inputs)))
+  [matrix]
+  (apply map list matrix))
 
 (defn power-consumption
   [readings]
@@ -20,4 +20,4 @@
               e (key (apply min-key val freq))]
           [(str gamma g) (str epsilon e)]))
       ["" ""]
-      (transpose inputs))))
+      (transpose (map #(str/split % #"") inputs)))))
