@@ -1,4 +1,4 @@
-(ns adventofcode-2021.exercises.day-4.part-1)
+(ns adventofcode-2021.exercises.day-4.part-2)
 
 (require '[clojure.string :as str])
 
@@ -27,12 +27,13 @@
     (vec boards)))
 
 (defn update-markups
-  [n index markups sum]
+  [n index markups sum playing]
   (loop [next-index index
          updated-markup markups
-         next-sum sum]
+         next-sum sum
+         next-playing playing]
     (if (empty? next-index)
-      {:winner nil :markups updated-markup :sum next-sum}
+      {:loser nil :markups updated-markup :sum next-sum :playing next-playing}
       (let [[bidx ridx cidx] (first next-index)
             row-index [bidx :rows ridx]
             column-index [bidx :columns cidx]
@@ -40,20 +41,24 @@
             new-markup (update-in marked-row column-index conj n)
             row (get-in new-markup row-index)
             column (get-in new-markup column-index)
-            new-sum (update next-sum bidx - (Integer/parseInt n))]
-        (if (or (= 5 (count row) ) (= 5 (count column)))
-          {:winner {:sum (get new-sum bidx) :n (Integer/parseInt n)} :markups new-markup :sum new-sum}
-          (recur (next next-index) new-markup new-sum))))))
+            new-sum (update next-sum bidx - (Integer/parseInt n))
+            won (or (= 5 (count row) ) (= 5 (count column)))
+            new-playing (if won (disj next-playing bidx) next-playing)]
+        (if (empty? new-playing)
+          {:loser {:sum (get new-sum bidx) :n (Integer/parseInt n)} :markups new-markup :sum new-sum :playing new-playing}
+          (recur (next next-index) new-markup new-sum new-playing))))))
 
 (defn run
   [inputs]
   (let [boards (parse-boards (next inputs))
-        {:keys [index initial-sum]} (index-boards boards)]
+        {:keys [index initial-sum]} (index-boards boards)
+        initial-playing (set (range (count boards)))]
     (loop [numbers (str/split (first inputs) #",")
            updated-markups (vec (repeat (count boards) {:rows {} :columns {}}))
-           next-sum initial-sum]
+           next-sum initial-sum
+           next-playing initial-playing]
       (let [n (first numbers)
-            {:keys [winner markups sum]} (update-markups n (get index n) updated-markups next-sum)]
-        (if (not (nil? winner))
-          (* (:sum winner) (:n winner))
-          (recur (next numbers) markups sum))))))
+            {:keys [loser markups sum playing]} (update-markups n (get index n) updated-markups next-sum next-playing)]
+        (if (not (nil? loser))
+          (* (:sum loser) (:n loser))
+          (recur (next numbers) markups sum playing))))))
