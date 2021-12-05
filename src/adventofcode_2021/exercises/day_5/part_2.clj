@@ -1,4 +1,4 @@
-(ns adventofcode-2021.exercises.day-5.part-1)
+(ns adventofcode-2021.exercises.day-5.part-2)
 
 (require '[clojure.string :as str])
 
@@ -22,6 +22,13 @@
   [xa xb]
   (range (min xa xb) (inc (max xa xb))))
 
+(defn diagonal-segment
+  [xa ya xb yb]
+  (let [ystart (if (> xb xa) ya yb)
+        op (if (= ystart (min ya yb)) + -)]
+    (map-indexed (fn [idx itm] [itm (op ystart idx)]) (range (min xa xb) (inc (max xa xb))))))
+
+
 (defn run
   [inputs]
   (reduce
@@ -33,6 +40,7 @@
           (reduce #(update %1 (str/join "-" [xa %2]) (fnil inc 0)) dia (vertical-segment ya yb))
           (if (= ya yb)
             (reduce #(update %1 (str/join "-" [%2 ya]) (fnil inc 0)) dia (horizontal-segment xa xb))
-            dia)))
+            (reduce (fn [acc [x y]] (update acc (str/join "-" [x y]) (fnil inc 0))) dia (diagonal-segment xa ya xb yb)))))
       {}
       (parse-inputs inputs)))))
+
